@@ -25,6 +25,10 @@ defmodule Revolution.PlayChannel do
 
   def handle_in("get_cards", payload, socket) do
     # here is where we return the cards...
+    push socket, "get_cards", %{
+      cards: Game.get_cards()
+    }
+    {:noreply, socket}
   end
 
   # It is also common to receive messages from the client and

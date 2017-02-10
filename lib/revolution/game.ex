@@ -19,10 +19,13 @@ defmodule Revolution.Game do
   end
 
   def get_cards() do
-    [
-      {"keith", "tanya"},
-      {"mum", "dad"},
-      {"bill", "ben"},
-    ]
+    %{
+      "1": "keith",
+      "2": "tanya",
+      "3": "mum",
+      "4": "dad",
+      "5": "bill",
+      "6": "ben",
+    }
   end
 end
