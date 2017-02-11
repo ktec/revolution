@@ -1,44 +1,67 @@
 import { createLabel } from "../common/labels"
-import { createSyncLabel } from "../common/sync_labels"
+import { createCard } from "../common/cards"
 import { leaveChannel } from "../common/channels"
 
 export class Play extends Phaser.State {
   create(game) {
-    game.stage.backgroundColor = 0x551A8B
-
+    game.stage.backgroundColor = 0x86836d
 
     const label2 = createLabel(this, "Click to return to Lobby")
     label2.anchor.setTo(0.5)
     label2.inputEnabled = true
-    label2.y += 100
+    label2.y += 200
+    label2.fontSize = 12
     label2.events.onInputDown.add(() =>
       leaveChannel(this.channel, game.gotoLobby)
     )
+    const cardFactory = createCard(this)(this.channel)
 
+    this.cards = {}
     this.channel.on("get_cards", ({cards}) => {
       Object.entries(cards).map((card) => {
-        this.createCard(...card)
+        const [id, [name, x, y]] = card
+        const sprite = cardFactory(id, name, x, y)
+        sprite.events.onDragStop.add(this.stopDrag.bind(this))
+        this.cards[id] = sprite
       })
     })
     this.channel.push("get_cards")
-    this.cards = {}
+
+    this.channel.on("match_found", ({right, left}) => {
+      console.log(right, left)
+      this.cards[right].kill()
+      this.cards[left].kill()
+      this.cards[left] = null
+      this.cards[right] = null
+    })
+
+    this.channel.on("no_match", ({msg}) => {
+      console.log(msg)
+      // may the card should jump back to its origin?
+    })
+
   }
 
-  createCard(id, value) {
-    const label = createSyncLabel(this, value, this.channel, id)
-    // const {x, y} = this.randomPosition(label)
-    // this.label.x = x
-    // this.label.y = y
-    this.cards[id] = label
+  stopDrag(currentSprite) {
+    Object.entries(this.cards).map(([id, sprite]) => {
+      if (currentSprite != sprite) {
+        const isOverlap = this.checkOverlap(currentSprite, sprite)
+        if (isOverlap) {
+          this.channel.push("submit_match", {left: currentSprite.id, right: sprite.id})
+        }
+      }
+    })
   }
 
-  // randomPosition({width, height}) {
-  //   const mx = this.game.width - width
-  //   const my = this.game.height - height
-  //   const randomX = this.game.rnd.integerInRange(0, mx)
-  //   const randomY = this.game.rnd.integerInRange(0, my)
-  //   return {x: randomX, y: randomY}
-  // }
+  checkOverlap(spriteA, spriteB) {
+    if (spriteA && spriteB) {
+      const boundsA = spriteA.getBounds()
+      const boundsB = spriteB.getBounds()
+      return Phaser.Rectangle.intersects(boundsA, boundsB)
+    } else {
+      return false
+    }
+  }
 
   init(...options) {
     console.log("starting Play state")

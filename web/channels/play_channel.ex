@@ -31,6 +31,18 @@ defmodule Revolution.PlayChannel do
     {:noreply, socket}
   end
 
+  def handle_in("submit_match",  %{"left" => left, "right" => right} = payload, socket) do
+    Logger.debug "Match submitted: #{left} #{right}"
+    case Game.submit_match(left, right) do
+      :match ->
+        Logger.debug "Match found #{left} #{right}"
+        broadcast socket, "match_found", payload
+      :no_match ->
+        push socket, "no_match", %{"msg" => "No match found"}
+    end
+    {:noreply, socket}
+  end
+
   # It is also common to receive messages from the client and
   # broadcast to everyone in the current topic (lobby).
   def handle_in("shout", payload, socket) do

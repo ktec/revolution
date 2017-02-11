@@ -12,6 +12,5 @@ export const createSyncLabel = (state, message, channel, id) => {
 
   // send message on drag stop [sprite, channel, event]
   syncPosition(label, channel, label.events.onDragUpdate)
-
- return label
+  return label
 }

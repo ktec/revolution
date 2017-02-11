@@ -20,12 +20,20 @@ defmodule Revolution.Game do
 
   def get_cards() do
     %{
-      "1": "keith",
-      "2": "tanya",
-      "3": "mum",
-      "4": "dad",
-      "5": "bill",
-      "6": "ben",
+      "1": ["keith", 100, 100],
+      "2": ["tanya", 600, 120],
+      "3": ["mum", 300, 140],
+      "4": ["dad", 400, 260],
+      "5": ["bill", 500, 180],
+      "6": ["ben", 200, 200],
     }
   end
+
+  def submit_match("1", "2"), do: :match
+  def submit_match("2", "1"), do: :match
+  def submit_match("3", "4"), do: :match
+  def submit_match("4", "3"), do: :match
+  def submit_match("5", "6"), do: :match
+  def submit_match("6", "5"), do: :match
+  def submit_match(_, _), do: :no_match
 end
