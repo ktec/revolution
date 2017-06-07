@@ -1,5 +1,4 @@
 import { createLabel } from "../common/labels"
-import { createSyncLabel } from "../common/sync_labels"
 import { syncPosition } from "../common/sync"
 import { leaveChannel } from "../common/channels"
 
@@ -24,10 +23,6 @@ export class Lobby extends Phaser.State {
     // this.startButton.anchor.setTo(0.5, 0.5)
     // this.game.physics.arcade.enable(this.startButton)
     // this.startButton.tint= 0xff00ff
-
-    const label = createSyncLabel(this, "Drag me!", this.channel, "1")
-    label.fontSize = 24
-    label.y += 200
 
     const label2 = createLabel(this, "Start Game")
     label2.anchor.setTo(0.5)

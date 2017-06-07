@@ -18,28 +18,30 @@ export class Play extends Phaser.State {
 
     this.cards = {}
     this.channel.on("get_cards", ({cards}) => {
-      Object.entries(cards).map((card) => {
-        const [id, [name, x, y]] = card
-        const sprite = cardFactory(id, name, x, y)
-        sprite.events.onDragStop.add(this.stopDrag.bind(this))
-        this.cards[id] = sprite
-      })
+      this.drawCards(Object.entries(cards), cardFactory)
     })
     this.channel.push("get_cards")
 
-    this.channel.on("match_found", ({right, left}) => {
-      console.log(right, left)
-      this.cards[right].kill()
-      this.cards[left].kill()
-      this.cards[left] = null
-      this.cards[right] = null
+    this.channel.on("remove_cards", ({cards}) => {
+      cards.map((card_id) => {
+        this.cards[card_id].kill()
+        this.cards[card_id] = null
+      })
     })
 
     this.channel.on("no_match", ({msg}) => {
       console.log(msg)
       // may the card should jump back to its origin?
     })
+  }
 
+  drawCards(cards, cardFactory) {
+    cards.map((card) => {
+      const [id, [name, x, y]] = card
+      const sprite = cardFactory(id, name, x, y)
+      sprite.events.onDragStop.add(this.stopDrag.bind(this))
+      this.cards[id] = sprite
+    })
   }
 
   stopDrag(currentSprite) {
@@ -64,7 +66,7 @@ export class Play extends Phaser.State {
   }
 
   init(...options) {
-    console.log("starting Play state")
+    // console.log("starting Play state")
     const [channel] = options
     this.channel = channel
   }

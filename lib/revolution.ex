@@ -15,6 +15,7 @@ defmodule Revolution do
       # Start your own worker by calling: Revolution.Worker.start_link(arg1, arg2, arg3)
       # worker(Revolution.Worker, [arg1, arg2, arg3]),
       supervisor(Revolution.PlayerSupervisor, []),
+      supervisor(Revolution.GameSupervisor, []),
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

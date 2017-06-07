@@ -5,12 +5,9 @@ defmodule Revolution.PlayChannel do
 
   def join("games:play", payload, socket) do
     if authorized?(payload) do
-      Logger.debug "#{socket.assigns.user_id} joined the Play channel"
       case Game.join(socket.assigns.user_id) do
-        {:ok, response} ->
-          {:ok, response, socket}
-        error ->
-          error
+        {:ok, response} -> {:ok, response, socket}
+                  error -> error
       end
     else
       {:error, %{reason: "unauthorized"}}
@@ -18,27 +15,21 @@ defmodule Revolution.PlayChannel do
   end
 
   def terminate(_reason, socket) do
-    Logger.debug "#{socket.assigns.user_id} left the Play channel"
     Game.leave(socket.assigns.user_id)
     socket
   end
 
   def handle_in("get_cards", payload, socket) do
     # here is where we return the cards...
-    push socket, "get_cards", %{
-      cards: Game.get_cards()
-    }
+    push socket, "get_cards", %{ cards: Game.get_cards() }
     {:noreply, socket}
   end
 
-  def handle_in("submit_match",  %{"left" => left, "right" => right} = payload, socket) do
-    Logger.debug "Match submitted: #{left} #{right}"
-    case Game.submit_match(left, right) do
-      :match ->
-        Logger.debug "Match found #{left} #{right}"
-        broadcast socket, "match_found", payload
-      :no_match ->
-        push socket, "no_match", %{"msg" => "No match found"}
+  def handle_in("submit_match", payload, socket) do
+    %{"left" => left, "right" => right} = payload
+    case Game.check_pair(left, right) do
+         :match -> remove_cards(socket, [left, right])
+      :no_match -> push socket, "no_match", %{"msg" => "No match found"}
     end
     {:noreply, socket}
   end
@@ -57,7 +48,13 @@ defmodule Revolution.PlayChannel do
   end
 
   # Add authorization logic here as required.
-  defp authorized?(_payload) do
+  defp authorized?(payload) do
     true
+  end
+
+  defp authorized?()
+
+  defp remove_cards(socket, cards) do
+    broadcast socket, "remove_cards", %{"cards" => cards}
   end
 end
